@@ -19,7 +19,7 @@ add_translation('zh_cn', array(
 
 	'home' => '首页',
 
-	'newsfeed' => '新闻Feed',
+	'newsfeed' => '新鲜事',
 
 	'profile:wall' => "新鲜事",
 	'profile:info' => "信息",
