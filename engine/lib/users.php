@@ -565,6 +565,8 @@ function get_user_by_username($username) {
 	$entity = get_data_row($query, 'entity_row_to_elggstar');
 	if ($entity) {
 		$USERNAME_TO_GUID_MAP_CACHE[$username] = $entity->guid;
+	} else {
+		$entity = false;
 	}
 
 	return $entity;
@@ -1088,14 +1090,14 @@ function collections_page_handler($page_elements) {
 	$base = elgg_get_config('path');
 	if (isset($page_elements[0])) {
 		if ($page_elements[0] == "add") {
-			set_page_owner(elgg_get_logged_in_user_guid());
+			elgg_set_page_owner_guid(elgg_get_logged_in_user_guid());
 			collections_submenu_items();
 			require_once "{$base}pages/friends/collections/add.php";
 			return true;
 		} else {
 			$user = get_user_by_username($page_elements[0]);
 			if ($user) {
-				set_page_owner($user->getGUID());
+				elgg_set_page_owner_guid($user->getGUID());
 				if (elgg_get_logged_in_user_guid() == elgg_get_page_owner_guid()) {
 					collections_submenu_items();
 				}
@@ -1279,6 +1281,11 @@ function elgg_user_hover_menu($hook, $type, $return, $params) {
 
 		$url = "profile/$user->username/edit";
 		$item = new ElggMenuItem('profile:edit', elgg_echo('profile:edit'), $url);
+		$item->setSection('admin');
+		$return[] = $item;
+
+		$url = "settings/user/$user->username";
+		$item = new ElggMenuItem('settings:edit', elgg_echo('settings:edit'), $url);
 		$item->setSection('admin');
 		$return[] = $item;
 	}
@@ -1476,14 +1483,15 @@ function users_pagesetup() {
 
 	// topbar
 	if ($viewer) {
-
-		$icon_url = $viewer->getIconURL('topbar');
-		$class = 'elgg-border-plain elgg-transition';
-		$title = elgg_echo('profile');
 		elgg_register_menu_item('topbar', array(
 			'name' => 'profile',
 			'href' =>  $viewer->getURL(),
-			'text' => "<img src=\"$icon_url\" alt=\"$viewer->name\" title=\"$title\" class=\"$class\" />",
+			'text' => elgg_view('output/img', array(
+				'src' => $viewer->getIconURL('topbar'),
+				'alt' => $viewer->name,
+				'title' => elgg_echo('profile'),
+				'class' => 'elgg-border-plain elgg-transition',
+			)),
 			'priority' => 100,
 			'link_class' => 'elgg-topbar-avatar',
 		));

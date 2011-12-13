@@ -89,21 +89,21 @@ class ElggCoreEntityTest extends ElggCoreUnitTest {
 		$this->assertFalse(isset($this->entity->non_existent));
 
 		// create metadata
-		$this->assertTrue($this->entity->non_existent = 'testing');
+		$this->entity->existent = 'testing';
+		$this->assertIdentical($this->entity->existent, 'testing');
 
 		// check metadata set
-		$this->assertTrue(isset($this->entity->non_existent));
-		$this->assertIdentical($this->entity->non_existent, 'testing');
-		$this->assertIdentical($this->entity->getMetaData('non_existent'), 'testing');
+		$this->assertTrue(isset($this->entity->existent));
+		$this->assertIdentical($this->entity->getMetaData('existent'), 'testing');
 
 		// check internal metadata array
 		$metadata = $this->entity->expose_metadata();
-		$this->assertIdentical($metadata['non_existent'], 'testing');
+		$this->assertIdentical($metadata['existent'], 'testing');
 	}
 
 	public function testElggEnityGetAndSetAnnotations() {
 		$this->assertFalse(array_key_exists('non_existent', $this->entity->expose_annotations()));
-		$this->assertFalse($this->entity->getAnnotations('non_existent'));
+		$this->assertIdentical($this->entity->getAnnotations('non_existent'), array());
 
 		// set and check temp annotation
 		$this->assertTrue($this->entity->annotate('non_existent', 'testing'));
@@ -178,7 +178,7 @@ class ElggCoreEntityTest extends ElggCoreUnitTest {
 		$this->AssertEqual($this->entity->get('non_existent'), 'testing');
 
 		// clean up with delete
-		$this->assertTrue($this->entity->delete());
+		$this->assertIdentical(true, $this->entity->delete());
 	}
 
 	public function testElggEntityDisableAndEnable() {
@@ -230,24 +230,26 @@ class ElggCoreEntityTest extends ElggCoreUnitTest {
 		// let's delete a non-existent metadata
 		$this->assertFalse($this->entity->deleteMetadata('important'));
 
-		// let's add the meatadata
-		$this->assertTrue($this->entity->important = 'indeed!');
-		$this->assertTrue($this->entity->less_important = 'true, too!');
+		// let's add the metadata
+		$this->entity->important = 'indeed!';
+		$this->assertIdentical('indeed!', $this->entity->important);
+		$this->entity->less_important = 'true, too!';
+		$this->assertIdentical('true, too!', $this->entity->less_important);
 		$this->save_entity();
 
 		// test deleting incorrectly
 		// @link http://trac.elgg.org/ticket/2273
-		$this->assertFalse($this->entity->deleteMetadata('impotent'));
+		$this->assertNull($this->entity->deleteMetadata('impotent'));
 		$this->assertEqual($this->entity->important, 'indeed!');
 
 		// get rid of one metadata
 		$this->assertEqual($this->entity->important, 'indeed!');
 		$this->assertTrue($this->entity->deleteMetadata('important'));
-		$this->assertEqual($this->entity->important, '');
+		$this->assertNull($this->entity->important);
 
 		// get rid of all metadata
 		$this->assertTrue($this->entity->deleteMetadata());
-		$this->assertEqual($this->entity->less_important, '');
+		$this->assertNull($this->entity->less_important);
 
 		// clean up database
 		$this->assertTrue($this->entity->delete());

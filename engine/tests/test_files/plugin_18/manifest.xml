@@ -6,8 +6,8 @@
 	<blurb>A concise description.</blurb>
 	<description>A longer, more interesting description.</description>
 	<website>http://www.elgg.org/</website>
-	<copyright>(C) Elgg 2010</copyright>
-	<license>GNU Public License version 2</license>
+	<copyright>(C) Elgg Foundation 2011</copyright>
+	<license>GNU General Public License version 2</license>
 
 	<requires>
 		<type>elgg_version</type>
@@ -33,8 +33,6 @@
 	<category>Admin</category>
 
 	<category>ServiceAPI</category>
-
-	<activate_on_install>true</activate_on_install>
 
 	<requires>
 		<type>php_extension</type>
@@ -101,5 +99,7 @@
 		<name>facebook_connect</name>
 		<version>1.0</version>
 	</suggests>
+
+	<activate_on_install>true</activate_on_install>
 
 </plugin_manifest>

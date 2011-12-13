@@ -138,6 +138,7 @@ p {
 	visibility: hidden;
 	height: 0 !important;
 	line-height: 0;
+	overflow: hidden;
 	font-size: xx-large;
 	content: " x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x ";
 }
@@ -320,6 +321,9 @@ p {
 .elgg-module-main > .elgg-head {
 	margin-bottom: 5px;
 }
+.elgg-module-info > .elgg-head {
+	margin-bottom: 10px;
+}
 .elgg-module-inline {
 	margin: 20px 0;
 }
@@ -442,6 +446,9 @@ textarea {
 }
 .elgg-input-thin {
 	width: 400px;
+}
+.elgg-input-natural {
+	width: auto;
 }
 
 .elgg-button {

@@ -130,9 +130,9 @@
 }
 
 .elgg-menu-topbar > li > a {
-	padding: 2px 15px 0;
+	padding-top: 2px;
 	color: #eee;
-	margin-top: 1px;
+	margin: 1px 15px 0;
 }
 
 .elgg-menu-topbar > li > a:hover {
@@ -372,7 +372,10 @@
 	position: absolute;
 	z-index: 10000;
 
-	width: 165px;
+	overflow: hidden;
+
+	min-width: 165px;
+	max-width: 250px;
 	border: solid 1px;
 	border-color: #E5E5E5 #999 #999 #E5E5E5;
 	background-color: #FFF;

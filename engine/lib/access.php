@@ -610,8 +610,7 @@ function delete_access_collection($collection_id) {
 		WHERE id = {$collection_id}";
 	$result = delete_data($q);
 
-
-	return $result;
+	return (bool)$result;
 }
 
 /**
@@ -718,7 +717,7 @@ function remove_user_from_access_collection($user_guid, $collection_id) {
 		WHERE access_collection_id = {$collection_id}
 			AND user_guid = {$user_guid}";
 
-	return delete_data($q);
+	return (bool)delete_data($q);
 }
 
 /**

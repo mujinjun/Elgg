@@ -127,7 +127,7 @@ class ElggCoreHelpersTest extends ElggCoreUnitTest {
 		$this->assertIdentical('http://test1.com', $item->url);
 
 		// send a bad url
-		$result = @elgg_register_js('bad');
+		$result = elgg_register_js('bad', null);
 		$this->assertFalse($result);
 	}
 
@@ -351,7 +351,7 @@ class ElggCoreHelpersTest extends ElggCoreUnitTest {
 		$test_elements = $pl->getElements();
 
 		// make sure it's gone.
-		$this->assertTrue(2, count($test_elements));
+		$this->assertEqual(2, count($test_elements));
 		$this->assertIdentical($elements[0], $test_elements[0]);
 		$this->assertIdentical($elements[2], $test_elements[2]);
 	}
@@ -369,7 +369,7 @@ class ElggCoreHelpersTest extends ElggCoreUnitTest {
 			$pl->add($element, $priority);
 		}
 
-		$this->assertTrue($pl->move($elements[-5], 10));
+		$this->assertEqual($pl->move($elements[-5], 10), 10);
 		
 		// check it's at the new place
 		$this->assertIdentical($elements[-5], $pl->getElement(10));

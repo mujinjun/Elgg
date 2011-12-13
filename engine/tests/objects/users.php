@@ -41,9 +41,6 @@ class ElggCoreUserTest extends ElggCoreUnitTest {
 		parent::__destruct();
 	}
 
-	/**
-	 * A basic test that will be called and fail.
-	 */
 	public function testElggUserConstructor() {
 		$attributes = array();
 		$attributes['guid'] = NULL;
@@ -138,7 +135,7 @@ class ElggCoreUserTest extends ElggCoreUnitTest {
 		$guid = $this->user->save();
 
 		// delete object
-		$this->assertTrue($this->user->delete());
+		$this->assertIdentical(true, $this->user->delete());
 
 		// check GUID not in database
 		$this->assertFalse($this->fetchUser($guid));

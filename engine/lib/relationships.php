@@ -123,7 +123,7 @@ function check_entity_relationship($guid_one, $relationship, $guid_two) {
 			AND relationship='$relationship'
 			AND guid_two=$guid_two limit 1";
 
-	$row = $row = get_data_row($query);
+	$row = get_data_row($query);
 	if ($row) {
 		return $row;
 	}
@@ -158,7 +158,7 @@ function remove_entity_relationship($guid_one, $relationship, $guid_two) {
 			and relationship='$relationship'
 			and guid_two=$guid_two";
 
-		return delete_data($query);
+		return (bool)delete_data($query);
 	} else {
 		return false;
 	}
