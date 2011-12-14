@@ -11,8 +11,8 @@ add_translation('zh_cn', array(
 	'composer:prompt' => '分享',
 
 	'file:river:create' => '文件上传',
-	'files' => 'Files',
-
+	'files' => '文件',
+    'Wire' => '微博',
 	'friend:user:add' => "添加%s为好友",
 
 	'groups:add' => '创建群组...',
@@ -32,7 +32,7 @@ add_translation('zh_cn', array(
 
 	'pages:river:create' => '创建页面',
 
-	'river:comment:object:thewire' => '%s发表微博',
+	'river:comment:object:thewire' => '%s对微博进行了评论',
 	'river:comments:all' => '查看所有%d 评论',
 	'river:messageboard:group:default' => '',
 	'river:replies:all' => '查看所有%d 回复',

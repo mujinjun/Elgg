@@ -40,7 +40,6 @@ $simplifiedChinese = array(
 	'thewire:num' => '显示条数',
 	'thewire:moreposts' => '更多微博',
 
-
     /**
 	 * Status messages
 	 */
@@ -56,6 +55,7 @@ $simplifiedChinese = array(
 	'thewire:notify:subject' => "新微博",
 	'thewire:notify:reply' => '%s回复了%s的微博:',
 	'thewire:notify:post' => '%s更新了微博:',
+	
 );
 
 add_translation("zh_cn", $simplifiedChinese);

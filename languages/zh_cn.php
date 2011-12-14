@@ -402,26 +402,30 @@ $simplifiedChinese= array(
 /**
  * River
  */
-	'river' => "河流",
-	'river:relationship:friend' => '和 成为朋友',
-	'river:noaccess' => '您没有查看这个目录的权限.',
-	'river:posted:generic' => '%s 发表',
-	'riveritem:single:user' => '一个用户',
-	'riveritem:plural:user' => '一些用户',
-	'river:ingroup' => '到组 %s',
-	'river:none' => '没有动态',
+	'river' => "新鲜事",
+	'river:friend:user:default' => "%s和%s成为好友",
+	'river:update:user:avatar' => '%s换了个新头像',
+	'river:update:user:profile' => '%s更新了个人资料',
+	'river:noaccess' => '暂无权限浏览该条目.',
+	'river:posted:generic' => '%s发表成功',
+	'riveritem:single:user' => '用户',
+	'riveritem:plural:user' => '用户',
+	'river:ingroup' => '到%s小组中',
+	'river:none' => '暂无动态',
+	'river:update' => '更新%s',
 
 	'river:widget:title' => "动态",
 	'river:widget:description' => "显示最新动态",
 	'river:widget:type' => "动态类型",
 	'river:widgets:friends' => '好友动态',
-	'river:widgets:all' => '所有网站动态',
+	'river:widgets:all' => '全站动态',
 
 /**
  * Notifications
  */
 	'notifications:usersettings' => "通知设置",
 	'notifications:methods' => "请指定您想允许哪种方法.",
+	'notification:method:email' => 'Email',
 
 	'notifications:usersettings:save:ok' => "您的通知设置成功保存.",
 	'notifications:usersettings:save:fail' => "在保存您的通知设置时有个问题.",
@@ -760,7 +764,7 @@ $simplifiedChinese= array(
 	'river:friends' => '好友动态',
 	'river:select' => '显示 %s',
 	'river:comments:more' => '+%u 更多',
-	'river:generic_comment' => '评论 %s %s',
+	'river:generic_comment' => '%s对%s发表了评论',
 
 	'friends:widget:description' => "显示部分好友.",
 	'friends:num_display' => "显示的好友数",
@@ -1056,7 +1060,7 @@ $simplifiedChinese= array(
 
 	'comments:count' => "%s 评论",
 
-	'riveraction:annotation:generic_comment' => '%s 评论 %s',
+	'riveraction:annotation:generic_comment' => '%s对%s发表了评论',
 
 	'generic_comments:add' => "发表评论",
 	'generic_comments:post' => "发表评论",
@@ -1069,6 +1073,7 @@ $simplifiedChinese= array(
 	'generic_comment:notdeleted' => "对不起, 我们不能删除这个评论.",
 	'generic_comment:failure' => "进入您的意见时发生意外错误，请再试一遍.",
 	'generic_comment:none' => '没有评论',
+	'generic_comment:title' => '评论人:%s',
 
 	'generic_comment:email:subject' => '您有一个新评论!',
 	'generic_comment:email:body' => "在您的项目上有一个新评论\"%s\" from %s. 它是:

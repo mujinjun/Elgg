@@ -11,11 +11,8 @@ $simplifiedChinese = array(
 	 * Menu items and titles
 	 */
 	'file' => "文件",
-	'files' => "文件",
-	'file:yours' => "您的文件",
-	'file:yours:friends' => "您朋友的文件",
 	'file:user' => "%s的文件",
-	'file:friends' => "%s朋友的文件",
+	'file:friends' => "好友的文件",
 	'file:all' => "所有文件",
 	'file:edit' => "编辑文件",
 	'file:more' => "更多的文件",
@@ -38,7 +35,10 @@ $simplifiedChinese = array(
 	'file:desc' => "描述",
 	'file:tags' => "标签",
 
-	'file:types' => "上传文件的形态",
+	'file:list:list' => '转到列表视图',
+	'file:list:gallery' => '转到缩略图浏览方式',
+
+	'file:types' => "上传的文件类型",
 
 	'file:type:' => '文件',
 	'file:type:all' => "所有文件",
@@ -73,10 +73,12 @@ $simplifiedChinese = array(
 
 	'file:display:number' => "显示的文件数",
 
-	'file:river:create' => '上传这个文件',
-	'river:commented:object:file' => '文件',
+	'river:create:object:file' => '%s上传了%s',
+	'river:comment:object:file' => '%s对文件%s发表了评论',
 
 	'item:object:file' => '文件',
+	
+	'file:newupload' => '有新文件上传了',
 
 	/**
 	 * Embed media
