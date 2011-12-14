@@ -30,7 +30,7 @@ $simplifiedChinese = array(
 	/**
 	 * The wire river
 	 */
-	'river:create:object:thewire' => "%s跟%s说",
+	'river:create:object:thewire' => "%s：",
 	'thewire:wire' => '微博',
 
 	/**
