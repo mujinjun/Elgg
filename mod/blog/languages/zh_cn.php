@@ -53,12 +53,12 @@ $simplifiedChinese = array(
     'blog:error:revision_not_found' => '无法找到这个修改.',
 
     // river
-    'blog:river:create' => '%s有新日志: %s',
+    'river:create:object:blog' => '%s发表新日志:%s',
     'river:commented:object:blog' => '%s对日志:%s进行了评论',
 
     // notifications
 	'blog:newpost' => '新日志',
-    
+
     // widget
     'blog:widget:description' => '显示最近的文章',
     'blog:moreblogs' => '更多文章',
