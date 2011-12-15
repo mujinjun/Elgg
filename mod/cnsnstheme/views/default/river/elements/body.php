@@ -31,7 +31,7 @@ if ($summary === false) {
 
 $message = elgg_extract('message', $vars, false);
 if ($message !== false) {
-	$message = "<div class=\"elgg-river-message\">$message</div>";
+	$message = "<span class=\"elgg-river-message\">$message</span>";
 }
 
 $attachments = elgg_extract('attachments', $vars, false);
@@ -56,8 +56,7 @@ if ($container instanceof ElggGroup && $container->guid != elgg_get_page_owner_g
 }
 
 echo <<<RIVER
-<div class="elgg-river-summary">$summary $group_string</div>
-$message
+<div class="elgg-river-summary">$summary $message $group_string</div>
 $attachments
 <span class="elgg-river-timestamp">$timestamp</span>
 $menu
