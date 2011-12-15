@@ -455,6 +455,7 @@
 	color: #888;
 	display: inline-block;
 	margin: 3px 0 0 -3px;
+	float: right;
 }
 
 .elgg-menu-river > li {
