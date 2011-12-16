@@ -1,7 +1,7 @@
 <?php
 add_translation('zh_cn', array(
 	'annotation:group_topic_post:value:placeholder' => '回复...',
-	'annotation:generic_comment:value:placeholder' => '评论...',
+	'annotation:generic_comment:value:placeholder' => '添加回复...',
 
 	'composer:object:thewire' => "状态",
 	'composer:object:bookmarks' => "书签",
@@ -32,8 +32,8 @@ add_translation('zh_cn', array(
 
 	'pages:river:create' => '创建页面',
 
-	'river:comment:object:thewire' => '%s对微博进行了评论',
-	'river:comments:all' => '查看所有%d 评论',
+	'river:comment:object:thewire' => '%s对微博进行了回复',
+	'river:comments:all' => '查看所有%d 回复',
 	'river:messageboard:group:default' => '',
 	'river:replies:all' => '查看所有%d 回复',
 	'river:to' => '%s &#x25B6 %s',

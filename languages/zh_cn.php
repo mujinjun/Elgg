@@ -663,7 +663,7 @@ $simplifiedChinese= array(
 	'admin:plugins:dependencies:name' => '名字',
 	'admin:plugins:dependencies:expected_value' => '测试值',
 	'admin:plugins:dependencies:local_value' => '实际值',
-	'admin:plugins:dependencies:comment' => '评论',
+	'admin:plugins:dependencies:comment' => '回复',
 
 	'admin:statistics:description' => "这是一个在您网站上统计的概述. 如果您需要更多详细数据, 一个专业的管理功能是可用的",
 	'admin:statistics:opt:description' => "查看用户和您的网站对象的统计信息.",
@@ -764,7 +764,7 @@ $simplifiedChinese= array(
 	'river:friends' => '好友动态',
 	'river:select' => '显示 %s',
 	'river:comments:more' => '+%u 更多',
-	'river:generic_comment' => '%s对%s发表了评论',
+	'river:generic_comment' => '%s回复了%s',
 
 	'friends:widget:description' => "显示部分好友.",
 	'friends:num_display' => "显示的好友数",
@@ -798,15 +798,15 @@ $simplifiedChinese= array(
 	'close' => '关闭',
 	'reply' => "回复",
 	'more' => '更多',
-	'comments' => '评论',
-	'import' => '进口',
-	'export' => '出口',
+	'comments' => '回复',
+	'import' => '导入',
+	'export' => '导出',
 	'untitled' => '无题',
 	'help' => '帮助',
 	'send' => '发送',
 	'post' => '发表',
 	'submit' => '提交',
-	'comment' => '评论',
+	'comment' => '回复',
 	'upgrade' => '更新',
 
 	'site' => '站点',
@@ -915,13 +915,13 @@ $simplifiedChinese= array(
  * Time
  */
 
-	'friendlytime:justnow' => "于现在",
-	'friendlytime:minutes' => "于%s分钟前",
-	'friendlytime:minutes:singular' => "于一分钟前",
-	'friendlytime:hours' => "于%s小时前",
-	'friendlytime:hours:singular' => "于一小时前",
-	'friendlytime:days' => "于%s天前",
-	'friendlytime:days:singular' => "于昨天",
+	'friendlytime:justnow' => "现在",
+	'friendlytime:minutes' => "%s分钟前",
+	'friendlytime:minutes:singular' => "1分钟前",
+	'friendlytime:hours' => "%s小时前",
+	'friendlytime:hours:singular' => "1小时前",
+	'friendlytime:days' => "%s天前",
+	'friendlytime:days:singular' => "昨天",
 	'friendlytime:date_format' => 'j F Y @ g:ia',
 
 	'date:month:01' => '一月 %s',
@@ -1058,25 +1058,25 @@ $simplifiedChinese= array(
  * Comments
  */
 
-	'comments:count' => "%s 评论",
+	'comments:count' => "回复(%s)",
 
-	'riveraction:annotation:generic_comment' => '%s对%s发表了评论',
+	'riveraction:annotation:generic_comment' => '%s回复了%s',
 
-	'generic_comments:add' => "发表评论",
-	'generic_comments:post' => "发表评论",
-	'generic_comments:text' => "评论",
-	'generic_comments:latest' => "最新评论",
-	'generic_comment:posted' => "您的评论成功发表.",
-	'generic_comment:deleted' => "这个评论成功删除.",
-	'generic_comment:blank' => "对不起, 在我们保存它之前您需要真正的东西放到您的评论中.",
+	'generic_comments:add' => "回复",
+	'generic_comments:post' => "回复",
+	'generic_comments:text' => "回复",
+	'generic_comments:latest' => "最新回复",
+	'generic_comment:posted' => "回复成功",
+	'generic_comment:deleted' => "回复删除成功.",
+	'generic_comment:blank' => "您得说点啥吧",
 	'generic_comment:notfound' => "对不起, 我们不能发现指定的项目.",
-	'generic_comment:notdeleted' => "对不起, 我们不能删除这个评论.",
+	'generic_comment:notdeleted' => "对不起, 该回复不能删除.",
 	'generic_comment:failure' => "进入您的意见时发生意外错误，请再试一遍.",
-	'generic_comment:none' => '没有评论',
-	'generic_comment:title' => '评论人:%s',
+	'generic_comment:none' => '没有回复',
+	'generic_comment:title' => '%s：',
 
-	'generic_comment:email:subject' => '您有一个新评论!',
-	'generic_comment:email:body' => "在您的项目上有一个新评论\"%s\" from %s. 它是:
+	'generic_comment:email:subject' => '您有一个新回复!',
+	'generic_comment:email:body' => "您有一个新回复\"%s\" from %s. 它是:
 
 
 %s
