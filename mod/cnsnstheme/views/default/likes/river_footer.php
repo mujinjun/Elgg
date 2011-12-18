@@ -38,7 +38,7 @@ if (elgg_is_logged_in() && $object->canAnnotate(0, 'likes')) {
 		));
 
 		$likes_button = elgg_view('output/url', array(
-			'href' => "action/likes/delete?annotation_id={$likes[0]->id}",
+			'href' => "action/likes/delete?guid={$guid}",
 			'text' => elgg_view_icon('thumbs-up-alt'),
 			'title' => elgg_echo('likes:remove'),
 			'is_action' => true,
