@@ -67,7 +67,7 @@ function autop($pee, $br = 1) {
 	$pee = preg_replace('/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n", $pee); // make paragraphs, including one at the end
 	$pee = preg_replace('|<p>\s*?</p>|', '', $pee); // under certain strange conditions it could create a P of entirely whitespace
 	$pee = preg_replace('!<p>([^<]+)\s*?(</(?:div|address|form)[^>]*>)!', "<p>$1</p>$2", $pee);
-	$pee = preg_replace( '|<p>|', "$1<p>", $pee );
+	$pee = preg_replace('|<p>|', "$1<p>", $pee);
 	$pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee); // don't pee all over a tag
 	$pee = preg_replace("|<p>(<li.+?)</p>|", "$1", $pee); // problem with nested lists
 	$pee = preg_replace('|<p><blockquote([^>]*)>|i', "<blockquote$1><p>", $pee);
@@ -81,11 +81,11 @@ function autop($pee, $br = 1) {
 	}
 	$pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', "$1", $pee);
 	$pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
-//	if (strpos($pee, '<pre') !== false) {
-//		mind the space between the ? and >.  Only there because of the comment.
-//		$pee = preg_replace_callback('!(<pre.*? >)(.*?)</pre>!is', 'clean_pre', $pee );
-//	}
-	$pee = preg_replace( "|\n</p>$|", '</p>', $pee );
+	//if (strpos($pee, '<pre') !== false) {
+	//	mind the space between the ? and >.  Only there because of the comment.
+	//	$pee = preg_replace_callback('!(<pre.*? >)(.*?)</pre>!is', 'clean_pre', $pee );
+	//}
+	$pee = preg_replace("|\n</p>$|", '</p>', $pee);
 
 	return $pee;
 }
@@ -234,7 +234,7 @@ function elgg_clean_vars(array $vars = array()) {
  *
  * @example
  * elgg_normalize_url('');                   // 'http://my.site.com/'
- * elgg_normalize_url('dashboard');       // 'http://my.site.com/dashboard'
+ * elgg_normalize_url('dashboard');          // 'http://my.site.com/dashboard'
  * elgg_normalize_url('http://google.com/'); // no change
  * elgg_normalize_url('//google.com/');      // no change
  *
@@ -255,6 +255,11 @@ function elgg_normalize_url($url) {
 		$validated = filter_var($tmp_address, FILTER_VALIDATE_URL);
 	} else {
 		$validated = filter_var($url, FILTER_VALIDATE_URL);
+	}
+
+	// work around for handling absoluate IRIs (RFC 3987) - see #4190
+	if (!$validated && (strpos($url, 'http:') === 0) || (strpos($url, 'https:') === 0)) {
+		$validated = true;
 	}
 
 	if ($validated) {

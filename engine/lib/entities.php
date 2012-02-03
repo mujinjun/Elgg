@@ -738,6 +738,7 @@ function elgg_entity_exists($guid) {
  *           Joined with subtypes by AND. See below)
  *
  * 	subtypes => NULL|STR entity subtype (SQL: subtype IN ('subtype1', 'subtype2))
+ *              Use ELGG_ENTITIES_NO_VALUE for no subtype.
  *
  * 	type_subtype_pairs => NULL|ARR (array('type' => 'subtype'))
  *                        (type = '$type' AND subtype = '$subtype') pairs
@@ -923,7 +924,7 @@ function elgg_get_entities(array $options = array()) {
 		}
 
 		if ($options['limit']) {
-			$limit = sanitise_int($options['limit']);
+			$limit = sanitise_int($options['limit'], false);
 			$offset = sanitise_int($options['offset'], false);
 			$query .= " LIMIT $offset, $limit";
 		}
@@ -960,8 +961,8 @@ function elgg_get_entity_type_subtype_where_sql($table, $types, $subtypes, $pair
 		return '';
 	}
 
-	// these are the only valid types for entities in elgg as defined in the DB.
-	$valid_types = array('object', 'user', 'group', 'site');
+	// these are the only valid types for entities in elgg
+	$valid_types = elgg_get_config('entity_types');
 
 	// pairs override
 	$wheres = array();
@@ -1378,34 +1379,33 @@ function disable_entity($guid, $reason = "", $recursive = true) {
 				}
 
 				if ($recursive) {
-					// Temporary token overriding access controls
-					// @todo Do this better.
-					static $__RECURSIVE_DELETE_TOKEN;
-					// Make it slightly harder to guess
-					$__RECURSIVE_DELETE_TOKEN = md5(elgg_get_logged_in_user_guid());
-
-					$sub_entities = get_data("SELECT * from {$CONFIG->dbprefix}entities
-						WHERE container_guid=$guid
-						or owner_guid=$guid
-						or site_guid=$guid", 'entity_row_to_elggstar');
+					$hidden = access_get_show_hidden_status();
+					access_show_hidden_entities(true);
+					$ia = elgg_set_ignore_access(true);
+					
+					$sub_entities = get_data("SELECT * FROM {$CONFIG->dbprefix}entities
+						WHERE (
+						container_guid = $guid
+						OR owner_guid = $guid
+						OR site_guid = $guid
+						) AND enabled='yes'", 'entity_row_to_elggstar');
 
 					if ($sub_entities) {
 						foreach ($sub_entities as $e) {
+							add_entity_relationship($e->guid, 'disabled_with', $entity->guid);
 							$e->disable($reason);
 						}
 					}
-
-					$__RECURSIVE_DELETE_TOKEN = null;
+					access_show_hidden_entities($hidden);
+					elgg_set_ignore_access($ia);
 				}
 
 				$entity->disableMetadata();
 				$entity->disableAnnotations();
-				// relationships can't be disabled. hope they join to the entities table.
-				//$entity->disableRelationships();
 
 				$res = update_data("UPDATE {$CONFIG->dbprefix}entities
-					set enabled='no'
-					where guid={$guid}");
+					SET enabled = 'no'
+					WHERE guid = $guid");
 
 				return $res;
 			}
@@ -1420,40 +1420,51 @@ function disable_entity($guid, $reason = "", $recursive = true) {
  * @warning In order to enable an entity using ElggEntity::enable(),
  * you must first use {@link access_show_hidden_entities()}.
  *
- * @param int $guid GUID of entity to enable
+ * @param int  $guid      GUID of entity to enable
+ * @param bool $recursive Recursively enable all entities disabled with the entity?
  *
  * @return bool
  */
-function enable_entity($guid) {
+function enable_entity($guid, $recursive = true) {
 	global $CONFIG;
 
 	$guid = (int)$guid;
 
 	// Override access only visible entities
-	$access_status = access_get_show_hidden_status();
+	$old_access_status = access_get_show_hidden_status();
 	access_show_hidden_entities(true);
 
+	$result = false;
 	if ($entity = get_entity($guid)) {
 		if (elgg_trigger_event('enable', $entity->type, $entity)) {
 			if ($entity->canEdit()) {
 
-				access_show_hidden_entities($access_status);
-
 				$result = update_data("UPDATE {$CONFIG->dbprefix}entities
-					set enabled='yes'
-					where guid={$guid}");
+					SET enabled = 'yes'
+					WHERE guid = $guid");
 
 				$entity->deleteMetadata('disable_reason');
 				$entity->enableMetadata();
 				$entity->enableAnnotations();
 
-				return $result;
+				if ($recursive) {
+					$disabled_with_it = elgg_get_entities_from_relationship(array(
+						'relationship' => 'disabled_with',
+						'relationship_guid' => $entity->guid,
+						'inverse_relationship' => true,
+					));
+
+					foreach ($disabled_with_it as $e) {
+						$e->enable();
+						remove_entity_relationship($e->guid, 'disabled_with', $entity->guid);
+					}
+				}
 			}
 		}
 	}
 
-	access_show_hidden_entities($access_status);
-	return false;
+	access_show_hidden_entities($old_access_status);
+	return $result;
 }
 
 /**
@@ -1510,18 +1521,23 @@ function delete_entity($guid, $recursive = true) {
 					$entity_disable_override = access_get_show_hidden_status();
 					access_show_hidden_entities(true);
 					$ia = elgg_set_ignore_access(true);
-					$sub_entities = get_data("SELECT * from {$CONFIG->dbprefix}entities
-						WHERE container_guid=$guid
-							or owner_guid=$guid
-							or site_guid=$guid", 'entity_row_to_elggstar');
-					if ($sub_entities) {
-						foreach ($sub_entities as $e) {
-							// check for equality so that an entity that is its own
-							// owner or container does not cause infinite loop
-							if ($e->guid != $guid) {
-								$e->delete(true);
-							}
-						}
+
+					// @todo there was logic in the original code that ignored
+					// entities with owner or container guids of themselves.
+					// this should probably be prevented in ElggEntity instead of checked for here
+					$options = array(
+						'wheres' => array(
+							"((container_guid = $guid OR owner_guid = $guid OR site_guid = $guid)"
+							. " AND guid != $guid)"
+							),
+						'limit' => 0
+					);
+
+					$batch = new ElggBatch('elgg_get_entities', $options);
+					$batch->setIncrementOffset(false);
+
+					foreach ($batch as $e) {
+						$e->delete(true);
 					}
 
 					access_show_hidden_entities($entity_disable_override);
@@ -1955,7 +1971,7 @@ function elgg_register_entity_type($type, $subtype = null) {
 	global $CONFIG;
 
 	$type = strtolower($type);
-	if (!in_array($type, array('object', 'site', 'group', 'user'))) {
+	if (!in_array($type, $CONFIG->entity_types)) {
 		return FALSE;
 	}
 
@@ -1990,7 +2006,7 @@ function unregister_entity_type($type, $subtype) {
 	global $CONFIG;
 
 	$type = strtolower($type);
-	if (!in_array($type, array('object', 'site', 'group', 'user'))) {
+	if (!in_array($type, $CONFIG->entity_types)) {
 		return FALSE;
 	}
 
@@ -2158,31 +2174,8 @@ function elgg_list_registered_entities(array $options = array()) {
 		$entities = array();
 	}
 
-	return elgg_view_entity_list($entities, $count, $options['offset'],
-		$options['limit'], $options['full_view'], $options['list_type_toggle'], $options['pagination']);
-}
-
-/**
- * Check the recursive delete permissions token.
- *
- * If an entity is deleted recursively, a permissions override is required to allow
- * contained or owned entities to be removed.
- *
- * @return bool
- * @elgg_plugin_hook_handler permissions_check all
- * @elgg_plugin_hook_handler permissions_check:metadata all
- * @access private
- */
-function recursive_delete_permissions_check() {
-	static $__RECURSIVE_DELETE_TOKEN;
-
-	if ((elgg_is_logged_in()) && ($__RECURSIVE_DELETE_TOKEN)
-	&& (strcmp($__RECURSIVE_DELETE_TOKEN, md5(elgg_get_logged_in_user_guid())))) {
-		return true;
-	}
-
-	// consult next function
-	return NULL;
+	$options['count'] = $count;
+	return elgg_view_entity_list($entities, $options);
 }
 
 /**
@@ -2299,11 +2292,6 @@ function entities_init() {
 
 	elgg_register_plugin_hook_handler('unit_test', 'system', 'entities_test');
 
-	// Allow a permission override for recursive entity deletion
-	// @todo Can this be done better?
-	elgg_register_plugin_hook_handler('permissions_check', 'all', 'recursive_delete_permissions_check');
-	elgg_register_plugin_hook_handler('permissions_check:metadata', 'all', 'recursive_delete_permissions_check');
-
 	elgg_register_plugin_hook_handler('gc', 'system', 'entities_gc');
 }
 
@@ -2318,3 +2306,4 @@ elgg_register_plugin_hook_handler('volatile', 'metadata', 'volatile_data_export_
 
 /** Register init system event **/
 elgg_register_event_handler('init', 'system', 'entities_init');
+

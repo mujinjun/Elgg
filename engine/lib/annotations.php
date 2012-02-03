@@ -163,13 +163,9 @@ function update_annotation($annotation_id, $name, $value, $value_type, $owner_gu
 		where id=$annotation_id and $access");
 
 	if ($result !== false) {
+		// @todo add plugin hook that sends old and new annotation information before db access
 		$obj = elgg_get_annotation_from_id($annotation_id);
-		if (elgg_trigger_event('update', 'annotation', $obj)) {
-			return true;
-		} else {
-			// @todo add plugin hook that sends old and new annotation information before db access
-			elgg_delete_annotation_by_id($annotation_id);
-		}
+		elgg_trigger_event('update', 'annotation', $obj);
 	}
 
 	return $result;
@@ -183,21 +179,23 @@ function update_annotation($annotation_id, $name, $value, $value_type, $owner_gu
  *
  * @param array $options Array in format:
  *
- * 	annotation_names => NULL|ARR Annotation names
+ * annotation_names              => NULL|ARR Annotation names
+ * annotation_values             => NULL|ARR Annotation values
+ * annotation_ids                => NULL|ARR annotation ids
+ * annotation_case_sensitive     => BOOL Overall Case sensitive
+ * annotation_owner_guids        => NULL|ARR guids for annotation owners
+ * annotation_created_time_lower => INT Lower limit for created time.
+ * annotation_created_time_upper => INT Upper limit for created time.
+ * annotation_calculation        => STR Perform the MySQL function on the annotation values returned.
+ *                                   Do not confuse this "annotation_calculation" option with the
+ *                                   "calculation" option to elgg_get_entities_from_annotation_calculation().
+ *                                   The "annotation_calculation" option causes this function to
+ *                                   return the result of performing a mathematical calculation on
+ *                                   all annotations that match the query instead of ElggAnnotation
+ *                                   objects.
+ *                                   See the docs for elgg_get_entities_from_annotation_calculation()
+ *                                   for the proper use of the "calculation" option.
  *
- * 	annotation_values => NULL|ARR Annotation values
- *
- * 	annotation_ids => NULL|ARR annotation ids
- *
- * 	annotation_case_sensitive => BOOL Overall Case sensitive
- *
- *  annotation_owner_guids => NULL|ARR guids for annotation owners
- *
- *  annotation_created_time_lower => INT Lower limit for created time.
- *
- *  annotation_created_time_upper => INT Upper limit for created time.
- *
- *  annotation_calculation => STR Perform the MySQL function on the annotation values returned.
  *
  * @return mixed
  * @since 1.8.0
@@ -211,9 +209,11 @@ function elgg_get_annotations(array $options = array()) {
  * Deletes annotations based on $options.
  *
  * @warning Unlike elgg_get_annotations() this will not accept an empty options array!
+ *          This requires at least one constraint: annotation_owner_guid(s),
+ *          annotation_name(s), annotation_value(s), or guid(s) must be set.
  *
  * @param array $options An options array. {@See elgg_get_annotations()}
- * @return mixed
+ * @return mixed Null if the metadata name is invalid. Bool on success or fail.
  * @since 1.8.0
  */
 function elgg_delete_annotations(array $options) {
@@ -239,7 +239,7 @@ function elgg_disable_annotations(array $options) {
 		return false;
 	}
 
-	$options['metastrings_type'] = 'annotations';
+	$options['metastring_type'] = 'annotations';
 	return elgg_batch_metastring_based_objects($options, 'elgg_batch_disable_callback');
 }
 
@@ -388,8 +388,14 @@ function elgg_list_entities_from_annotations($options = array()) {
  * Get entities ordered by a mathematical calculation on annotation values
  *
  * @param array $options An options array:
- * 	'annotation_calculation' => The calculation to use. Must be a valid MySQL function.
+ * 	'calculation'            => The calculation to use. Must be a valid MySQL function.
  *                              Defaults to sum.  Result selected as 'annotation_calculation'.
+ *                              Don't confuse this "calculation" option with the
+ *                              "annotation_calculation" option to elgg_get_annotations().
+ *                              This "calculation" option is applied to each entity's set of
+ *                              annotations and is selected as annotation_calculation for that row.
+ *                              See the docs for elgg_get_annotations() for proper use of the
+ *                              "annotation_calculation" option.
  *	'order_by'               => The order for the sorting. Defaults to 'annotation_calculation desc'.
  *	'annotation_names'       => The names of annotations on the entity.
  *	'annotation_values'	     => The values of annotations on the entity.
@@ -529,21 +535,30 @@ function elgg_annotation_exists($entity_guid, $annotation_type, $owner_guid = NU
 }
 
 /**
+ * Return the URL for a comment
+ *
+ * @param ElggAnnotation $comment The comment object 
+ * @return string
+ * @access private
+ */
+function elgg_comment_url_handler(ElggAnnotation $comment) {
+	$entity = $comment->getEntity();
+	if ($entity) {
+		return $entity->getURL() . '#item-annotation-' . $comment->id;
+	}
+}
+
+/**
  * Register an annotation url handler.
  *
- * @param string $function_name The function.
  * @param string $extender_name The name, default 'all'.
+ * @param string $function_name The function.
  *
  * @return string
  */
 function elgg_register_annotation_url_handler($extender_name = "all", $function_name) {
 	return elgg_register_extender_url_handler('annotation', $extender_name, $function_name);
 }
-
-/** Register the hook */
-elgg_register_plugin_hook_handler("export", "all", "export_annotation_plugin_hook", 2);
-
-elgg_register_plugin_hook_handler('unit_test', 'system', 'annotations_test');
 
 /**
  * Register annotation unit tests
@@ -554,3 +569,16 @@ function annotations_test($hook, $type, $value, $params) {
 	$value[] = $CONFIG->path . 'engine/tests/api/annotations.php';
 	return $value;
 }
+
+/**
+ * Initialize the annotation library
+ * @access private
+ */
+function elgg_annotations_init() {
+	elgg_register_annotation_url_handler('generic_comment', 'elgg_comment_url_handler');
+
+	elgg_register_plugin_hook_handler("export", "all", "export_annotation_plugin_hook", 2);
+	elgg_register_plugin_hook_handler('unit_test', 'system', 'annotations_test');
+}
+
+elgg_register_event_handler('init', 'system', 'elgg_annotations_init');

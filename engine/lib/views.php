@@ -196,6 +196,37 @@ function elgg_does_viewtype_fallback($viewtype) {
 	return FALSE;
 }
 
+/**
+ * Register a view to be available for ajax calls
+ *
+ * @param string $view The view name
+ * @return void
+ * @since 1.8.3
+ */
+function elgg_register_ajax_view($view) {
+	global $CONFIG;
+
+	if (!isset($CONFIG->allowed_ajax_views)) {
+		$CONFIG->allowed_ajax_views = array();
+	}
+
+	$CONFIG->allowed_ajax_views[$view] = true;
+}
+
+/**
+ * Unregister a view for ajax calls
+ * 
+ * @param string $view The view name
+ * @return void
+ * @since 1.8.3
+ */
+function elgg_unregister_ajax_view($view) {
+	global $CONFIG;
+
+	if (isset($CONFIG->allowed_ajax_views[$view])) {
+		unset($CONFIG->allowed_ajax_views[$view]);
+	}
+}
 
 /**
  * Returns the file location for a view.
@@ -415,7 +446,6 @@ function elgg_view($view, $vars = array(), $bypass = false, $debug = false, $vie
 	if (isset($vars['internalname']) && !isset($vars['__ignoreInternalname']) && !isset($vars['name'])) {
 		elgg_deprecated_notice('You should pass $vars[\'name\'] now instead of $vars[\'internalname\']', 1.8, 2);
 		$vars['name'] = $vars['internalname'];
-		$test=false;
 	} elseif (isset($vars['name'])) {
 		if (!isset($vars['internalname'])) {
 			$vars['__ignoreInternalname'] = '';
@@ -530,7 +560,7 @@ function elgg_view($view, $vars = array(), $bypass = false, $debug = false, $vie
  *
  * @return void
  * @since 1.7.0
- * @link http://docs.elgg.org/Views/Ejxtend
+ * @link http://docs.elgg.org/Views/Extend
  * @example views/extend.php
  */
 function elgg_extend_view($view, $view_extension, $priority = 501, $viewtype = '') {
@@ -1300,21 +1330,18 @@ function elgg_view_form($action, $form_vars = array(), $body_vars = array()) {
  * @access private
  */
 function elgg_view_list_item($item, array $vars = array()) {
+	global $CONFIG;
 
-	switch ($item->getType()) {
-		case 'user':
-		case 'object':
-		case 'group':
-		case 'site':
-			return elgg_view_entity($item, $vars);
-		case 'annotation':
-			return elgg_view_annotation($item, $vars);
-		case 'river':
-			return elgg_view_river_item($item, $vars);
-		default:
-			return false;
-			break;
+	$type = $item->getType();
+	if (in_array($type, $CONFIG->entity_types)) {
+		return elgg_view_entity($item, $vars);
+	} else if ($type == 'annotation') {
+		return elgg_view_annotation($item, $vars);
+	} else if ($type == 'river') {
+		return elgg_view_river_item($item, $vars);
 	}
+
+	return false;
 }
 
 /**
@@ -1598,7 +1625,6 @@ function elgg_views_boot() {
 
 	elgg_load_js('jquery');
 	elgg_load_js('jquery-ui');
-	elgg_load_js('jquery.form');
 	elgg_load_js('elgg');
 
 	elgg_register_simplecache_view('js/lightbox');
@@ -1611,6 +1637,8 @@ function elgg_views_boot() {
 	$elgg_css_url = elgg_get_simplecache_url('css', 'elgg');
 	elgg_register_css('elgg', $elgg_css_url);
 	elgg_load_css('elgg');
+
+	elgg_register_ajax_view('js/languages');
 
 	elgg_register_plugin_hook_handler('output:before', 'layout', 'elgg_views_add_rss_link');
 
@@ -1629,16 +1657,16 @@ function elgg_views_boot() {
 	// set default icon sizes - can be overridden in settings.php or with plugin
 	if (!elgg_get_config('icon_sizes')) {
 		$icon_sizes = array(
-			'topbar' => array('w'=>16, 'h'=>16, 'square'=>TRUE, 'upscale'=>TRUE),
-			'tiny' => array('w'=>25, 'h'=>25, 'square'=>TRUE, 'upscale'=>TRUE),
-			'small' => array('w'=>40, 'h'=>40, 'square'=>TRUE, 'upscale'=>TRUE),
-			'medium' => array('w'=>100, 'h'=>100, 'square'=>TRUE, 'upscale'=>TRUE),
-			'large' => array('w'=>200, 'h'=>200, 'square'=>FALSE, 'upscale'=>FALSE),
-			'master' => array('w'=>550, 'h'=>550, 'square'=>FALSE, 'upscale'=>FALSE),
+			'topbar' => array('w' => 16, 'h' => 16, 'square' => TRUE, 'upscale' => TRUE),
+			'tiny' => array('w' => 25, 'h' => 25, 'square' => TRUE, 'upscale' => TRUE),
+			'small' => array('w' => 40, 'h' => 40, 'square' => TRUE, 'upscale' => TRUE),
+			'medium' => array('w' => 100, 'h' => 100, 'square' => TRUE, 'upscale' => TRUE),
+			'large' => array('w' => 200, 'h' => 200, 'square' => FALSE, 'upscale' => FALSE),
+			'master' => array('w' => 550, 'h' => 550, 'square' => FALSE, 'upscale' => FALSE),
 		);
 		elgg_set_config('icon_sizes', $icon_sizes);
 	}
 }
 
-elgg_register_event_handler('boot', 'system', 'elgg_views_boot', 1000);
+elgg_register_event_handler('boot', 'system', 'elgg_views_boot');
 elgg_register_event_handler('init', 'system', 'elgg_views_handle_deprecated_views');

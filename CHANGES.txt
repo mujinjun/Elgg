@@ -1,3 +1,57 @@
+Version 1.8.3
+(January 12, 2012 from https://github.com/Elgg/Elgg/tree/1.8)
+
+ Enhancements:
+  * Adds a white list for ajax views
+  * Improved navigation tab options
+  * Added group specific search
+  * Added button for reverting avatar
+  * Improved documentation for core class attributes
+  * Adds a server info page under administer -> statistics
+  * Improving caching of icons and js/css
+  * Deprecation notices not displayed to non-admin users
+
+ Bugfixes:
+  * Fixed upgrade scripts for blog posts and groups forum posts
+  * Can now delete invitations to invisible groups
+  * Fixed several widget bugs
+  * Fixed access level on add to group river item
+  * Fixed recursive entity enabling
+  * Fixed limit on pages in sidebar navigation
+  * Fixed deletion of large numbers of annotations
+
+
+Version 1.8.2
+(December 21, 2011 from https://github.com/Elgg/Elgg/tree/1.8)
+
+ Enhancements:
+  * Added a 404 page
+  * Widgets controls now using the menu system
+  * Admins can edit users' account information
+  * Embed uploader supports uploading into groups
+  * Add a control panel widget for easy access to cache flushing and upgrading
+  * Comments now have a unqiue URL with fragment identifier
+  * JavaScript language files are cacheable
+  * jQuery form script only loaded when required
+
+ Bugfixes:
+  * Fixed default widgets
+  * Fixed activity filtering
+  * Embedding an image now inserts a medium sized image
+  * Search plugin only uses mbstring extension if enabled
+  * Site pages links returned to footer
+  * Fixed URL creation for users with non-ASCII characters in username
+  * The wire username parsing supports periods in usernames
+  * Returned the posting area to the main wire page
+  * Fixed layout issue on pages with a fragment identifier in URL
+  * Added support for call elgg_load_js() in header and footer
+  * Fixed user picker
+  * Fixed uservalidationbyemail plugin ignoring the actions of other plugins
+  * Fixed bug preventing the creation of admin users
+  * Fixed deleting a widget with JavaScript disabled
+  * Fixed many bugs in the unit/integration tests
+
+
 Version 1.8.1
 (November 16, 2011 from https://github.com/Elgg/Elgg/tree/1.8)
 

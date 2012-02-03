@@ -995,7 +995,8 @@ function elgg_trigger_plugin_hook($hook, $type, $params = null, $returnvalue = n
  * @access private
  */
 function _elgg_php_exception_handler($exception) {
-	error_log("*** FATAL EXCEPTION *** : " . $exception);
+	$timestamp = time();
+	error_log("Exception #$timestamp: $exception");
 
 	// Wipe any existing output buffer
 	ob_end_clean();
@@ -1011,7 +1012,17 @@ function _elgg_php_exception_handler($exception) {
 		$CONFIG->pagesetupdone = true;
 
 		elgg_set_viewtype('failsafe');
-		$body = elgg_view("messages/exceptions/exception", array('object' => $exception));
+		if (elgg_is_admin_logged_in()) {
+			$body = elgg_view("messages/exceptions/admin_exception", array(
+				'object' => $exception,
+				'ts' => $timestamp
+			));
+		} else {
+			$body = elgg_view("messages/exceptions/exception", array(
+				'object' => $exception,
+				'ts' => $timestamp
+			));
+		}
 		echo elgg_view_page(elgg_echo('exception:title'), $body);
 	} catch (Exception $e) {
 		$timestamp = time();
@@ -1144,9 +1155,11 @@ function elgg_dump($value, $to_screen = TRUE, $level = 'NOTICE') {
 	global $CONFIG;
 
 	// plugin can return false to stop the default logging method
-	$params = array('level' => $level,
-					'msg' => $value,
-					'to_screen' => $to_screen);
+	$params = array(
+		'level' => $level,
+		'msg' => $value,
+		'to_screen' => $to_screen,
+	);
 	if (!elgg_trigger_plugin_hook('debug', 'log', $params, true)) {
 		return;
 	}
@@ -1172,7 +1185,9 @@ function elgg_dump($value, $to_screen = TRUE, $level = 'NOTICE') {
  *
  * This function either displays or logs the deprecation message,
  * depending upon the deprecation policies in {@link CODING.txt}.
- * Logged messages are sent with the level of 'WARNING'.
+ * Logged messages are sent with the level of 'WARNING'. Only admins
+ * get visual deprecation notices. When non-admins are logged in, the
+ * notices are sent to PHP's log through elgg_dump().
  *
  * A user-visual message will be displayed if $dep_version is greater
  * than 1 minor releases lower than the current Elgg version, or at all
@@ -1183,11 +1198,12 @@ function elgg_dump($value, $to_screen = TRUE, $level = 'NOTICE') {
  *
  * @see CODING.txt
  *
- * @param str $msg             Message to log / display.
- * @param str $dep_version     Human-readable *release* version: 1.7, 1.7.3
- * @param int $backtrace_level How many levels back to display the backtrace. Useful if calling from
- *                             functions that are called from other places (like elgg_view()). Set
- *                             to -1 for a full backtrace.
+ * @param string $msg             Message to log / display.
+ * @param string $dep_version     Human-readable *release* version: 1.7, 1.8, ...
+ * @param int    $backtrace_level How many levels back to display the backtrace.
+ *                                Useful if calling from functions that are called
+ *                                from other places (like elgg_view()). Set to -1
+ *                                for a full backtrace.
  *
  * @return bool
  * @since 1.7.0
@@ -1196,13 +1212,13 @@ function elgg_deprecated_notice($msg, $dep_version, $backtrace_level = 1) {
 	// if it's a major release behind, visual and logged
 	// if it's a 1 minor release behind, visual and logged
 	// if it's for current minor release, logged.
-	// bugfixes don't matter because you're not deprecating between them, RIGHT?
+	// bugfixes don't matter because we are not deprecating between them
 
 	if (!$dep_version) {
-		return FALSE;
+		return false;
 	}
 
-	$elgg_version = get_version(TRUE);
+	$elgg_version = get_version(true);
 	$elgg_version_arr = explode('.', $elgg_version);
 	$elgg_major_version = (int)$elgg_version_arr[0];
 	$elgg_minor_version = (int)$elgg_version_arr[1];
@@ -1210,16 +1226,16 @@ function elgg_deprecated_notice($msg, $dep_version, $backtrace_level = 1) {
 	$dep_major_version = (int)$dep_version;
 	$dep_minor_version = 10 * ($dep_version - $dep_major_version);
 
-	$visual = FALSE;
+	$visual = false;
 
 	if (($dep_major_version < $elgg_major_version) ||
 		($dep_minor_version < $elgg_minor_version)) {
-		$visual = TRUE;
+		$visual = true;
 	}
 
 	$msg = "Deprecated in $dep_major_version.$dep_minor_version: $msg";
 
-	if ($visual) {
+	if ($visual && elgg_is_admin_logged_in()) {
 		register_error($msg);
 	}
 
@@ -1247,9 +1263,9 @@ function elgg_deprecated_notice($msg, $dep_version, $backtrace_level = 1) {
 
 	$msg .= implode("<br /> -> ", $stack);
 
-	elgg_log($msg, 'WARNING');
+	elgg_dump($msg, elgg_is_admin_logged_in(), 'WARNING');
 
-	return TRUE;
+	return true;
 }
 
 /**
@@ -1772,6 +1788,12 @@ function elgg_ajax_page_handler($page) {
 		unset($page[0]);
 		$view = implode('/', $page);
 
+		$allowed_views = elgg_get_config('allowed_ajax_views');
+		if (!array_key_exists($view, $allowed_views)) {
+			header('HTTP/1.1 403 Forbidden');
+			exit;
+		}
+
 		// pull out GET parameters through filter
 		$vars = array();
 		foreach ($_GET as $name => $value) {
@@ -1948,7 +1970,7 @@ function elgg_is_valid_options_for_batch_operation($options, $type) {
 	// at least one of these is required.
 	$required = array(
 		// generic restraints
-		'guid', 'guids', 'limit'
+		'guid', 'guids'
 	);
 
 	switch ($type) {
@@ -1996,9 +2018,7 @@ function elgg_is_valid_options_for_batch_operation($options, $type) {
  * @access private
  */
 function elgg_walled_garden_index() {
-	elgg_register_css('elgg.walled_garden', '/css/walled_garden.css');
 	elgg_load_css('elgg.walled_garden');
-	elgg_register_js('elgg.walled_garden', '/js/walled_garden.js');
 	elgg_load_js('elgg.walled_garden');
 	
 	$body = elgg_view('core/walled_garden/body');
@@ -2026,10 +2046,42 @@ function elgg_walled_garden_index() {
 function elgg_walled_garden() {
 	global $CONFIG;
 
+	elgg_register_css('elgg.walled_garden', '/css/walled_garden.css');
+	elgg_register_js('elgg.walled_garden', '/js/walled_garden.js');
+
 	// check for external page view
 	if (isset($CONFIG->site) && $CONFIG->site instanceof ElggSite) {
 		$CONFIG->site->checkWalledGarden();
 	}
+}
+
+/**
+ * Boots the engine
+ *
+ * 1. sets error handlers
+ * 2. connects to database
+ * 3. verifies the installation suceeded
+ * 4. loads application configuration
+ * 5. loads site configuration
+ *
+ * @access private
+ */
+function _elgg_engine_boot() {
+	// Register the error handlers
+	set_error_handler('_elgg_php_error_handler');
+	set_exception_handler('_elgg_php_exception_handler');
+
+	register_translations(dirname(dirname(dirname(__FILE__))) . "/languages/");
+
+	setup_db_connections();
+
+	verify_installation();
+
+	_elgg_load_application_config();
+
+	_elgg_load_site_config();
+
+	_elgg_load_cache();
 }
 
 /**
@@ -2155,6 +2207,7 @@ define('REFERRER', -1);
 define('REFERER', -1);
 
 elgg_register_event_handler('init', 'system', 'elgg_init');
+elgg_register_event_handler('boot', 'system', '_elgg_engine_boot', 1);
 elgg_register_plugin_hook_handler('unit_test', 'system', 'elgg_api_test');
 
 elgg_register_event_handler('init', 'system', 'add_custom_menu_items', 1000);

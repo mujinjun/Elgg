@@ -37,6 +37,7 @@ $english = array(
  * Errors
  */
 	'exception:title' => "Fatal Error.",
+	'exception:contact_admin' => 'An unrecoverable error has occurred and has been logged. Contact the site administrator with the following information:',
 
 	'actionundefined' => "The requested action (%s) was not defined in the system.",
 	'actionnotfound' => "The action file for %s was not found.",
@@ -208,10 +209,6 @@ $english = array(
 	'SecurityException:InvalidAPIKey' => "Invalid or missing API Key.",
 	'NotImplementedException:CallMethodNotImplemented' => "Call method '%s' is currently not supported.",
 
-	'NotImplementedException:XMLRPCMethodNotImplemented' => "XML-RPC method call '%s' not implemented.",
-	'InvalidParameterException:UnexpectedReturnFormat' => "Call to method '%s' returned an unexpected result.",
-	'CallException:NotRPCCall' => "Call does not appear to be a valid XML-RPC call",
-
 	'PluginException:NoPluginName' => "The plugin name could not be found",
 
 	'SecurityException:authenticationfailed' => "User could not be authenticated",
@@ -240,6 +237,9 @@ $english = array(
 	'changebookmark' => 'Please change your bookmark for this page',
 	'noaccess' => 'This content has been removed, is invalid, or you do not have permission to view it.',
 
+	'error:default' => 'Oops...something went wrong.',
+	'error:404' => 'Sorry. We could not find the page that you requested.',
+
 /**
  * API
  */
@@ -267,6 +267,8 @@ $english = array(
 	'PUBLIC' => "Public",
 	'access:friends:label' => "Friends",
 	'access' => "Access",
+	'access:limited:label' => "Limited",
+	'access:help' => "The access level",
 
 /**
  * Dashboard and widgets
@@ -360,6 +362,7 @@ $english = array(
 	'avatar:preview' => 'Preview',
 	'avatar:upload' => 'Upload a new avatar',
 	'avatar:current' => 'Current avatar',
+	'avatar:revert' => 'Revert your avatar to the default icon',
 	'avatar:crop:title' => 'Avatar cropping tool',
 	'avatar:upload:instructions' => "Your avatar is displayed throughout the site. You can change it as often as you'd like. (File formats accepted: GIF, JPG or PNG)",
 	'avatar:create:instructions' => 'Click and drag a square below to match how you want your avatar cropped. A preview will appear in the box on the right. When you are happy with the preview, click \'Create your avatar\'. This cropped version will be used throughout the site as your avatar.',
@@ -368,6 +371,8 @@ $english = array(
 	'avatar:resize:fail' => 'Resize of the avatar failed',
 	'avatar:crop:success' => 'Cropping the avatar succeeded',
 	'avatar:crop:fail' => 'Avatar cropping failed',
+	'avatar:revert:success' => 'Reverting the avatar succeeded',
+	'avatar:revert:fail' => 'Avatar revert failed',
 
 	'profile:edit' => 'Edit profile',
 	'profile:aboutme' => "About me",
@@ -560,6 +565,7 @@ $english = array(
 
 	'admin:statistics' => "Statistics",
 	'admin:statistics:overview' => 'Overview',
+	'admin:statistics:server' => 'Server Info',
 
 	'admin:appearance' => 'Appearance',
 	'admin:administer_utilities' => 'Utilities',
@@ -609,6 +615,12 @@ $english = array(
 
 	// argh, this is ugly
 	'admin:widget:admin_welcome:outro' => '<br />Be sure to check out the resources available through the footer links and thank you for using Elgg!',
+
+	'admin:widget:control_panel' => 'Control panel',
+	'admin:widget:control_panel:help' => "Provides easy access to common controls",
+
+	'admin:cache:flush' => 'Flush the caches',
+	'admin:cache:flushed' => "The site's caches have been flushed",
 
 	'admin:footer:faq' => 'Administration FAQ',
 	'admin:footer:manual' => 'Administration Manual',
@@ -711,6 +723,17 @@ $english = array(
 	'admin:statistics:label:version' => "Elgg version",
 	'admin:statistics:label:version:release' => "Release",
 	'admin:statistics:label:version:version' => "Version",
+
+	'admin:server:label:php' => 'PHP',
+	'admin:server:label:web_server' => 'Web Server',
+	'admin:server:label:server' => 'Server',
+	'admin:server:label:log_location' => 'Log Location',
+	'admin:server:label:php_version' => 'PHP version',
+	'admin:server:label:php_ini' => 'PHP ini file location',
+	'admin:server:label:php_log' => 'PHP Log',
+	'admin:server:label:mem_avail' => 'Memory available',
+	'admin:server:label:mem_used' => 'Memory used',
+	'admin:server:error_log' => "Web server's error log",
 
 	'admin:user:label:search' => "Find users:",
 	'admin:user:label:searchbutton' => "Search",
@@ -831,6 +854,7 @@ $english = array(
 	'new' => 'New',
 	'add' => 'Add',
 	'create' => 'Create',
+	'revert' => 'Revert',
 
 	'site' => 'Site',
 	'activity' => 'Activity',
@@ -1004,12 +1028,12 @@ Once you have logged in, we highly recommend that you change your password.
 	'installation:simplecache:description' => "The simple cache increases performance by caching static content including some CSS and JavaScript files. Normally you will want this on.",
 	'installation:simplecache:label' => "Use simple cache (recommended)",
 
-	'installation:viewpathcache:description' => "The view filepath cache decreases the loading times of plugins by caching the location of their views.",
-	'installation:viewpathcache:label' => "Use view filepath cache (recommended)",
+	'installation:systemcache:description' => "The system cache decreases the loading time of the Elgg engine by caching data to files.",
+	'installation:systemcache:label' => "Use system cache (recommended)",
 
 	'upgrading' => 'Upgrading...',
 	'upgrade:db' => 'Your database was upgraded.',
-	'upgrade:core' => 'Your elgg installation was upgraded.',
+	'upgrade:core' => 'Your Elgg installation was upgraded.',
 	'upgrade:unable_to_upgrade' => 'Unable to upgrade.',
 	'upgrade:unable_to_upgrade_info' =>
 		'This installation cannot be upgraded because legacy views
@@ -1078,11 +1102,6 @@ If you requested this, click on the link below. Otherwise ignore this email.
 	'default_access:label' => "Default access",
 	'user:default_access:success' => "Your new default access level was saved.",
 	'user:default_access:failure' => "Your new default access level could not be saved.",
-
-/**
- * XML-RPC
- */
-	'xmlrpc:noinputdata'	=>	"Input data missing",
 
 /**
  * Comments

@@ -122,6 +122,7 @@ function file_page_handler($page) {
 			include "$file_dir/friends.php";
 			break;
 		case 'view':
+		case 'read': // Elgg 1.7 compatibility
 			set_input('guid', $page[1]);
 			include "$file_dir/view.php";
 			break;
@@ -345,7 +346,8 @@ function file_icon_url_override($hook, $type, $returnvalue, $params) {
 
 		// thumbnails get first priority
 		if ($file->thumbnail) {
-			return "mod/file/thumbnail.php?file_guid=$file->guid&size=$size";
+			$ts = (int)$file->icontime;
+			return "mod/file/thumbnail.php?file_guid=$file->guid&size=$size&icontime=$ts";
 		}
 
 		$mapping = array(

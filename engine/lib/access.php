@@ -671,8 +671,10 @@ function add_user_to_access_collection($user_guid, $collection_id) {
 		return false;
 	}
 
+	// if someone tries to insert the same data twice, we do a no-op on duplicate key
 	$q = "INSERT INTO {$CONFIG->dbprefix}access_collection_membership
-			SET access_collection_id = {$collection_id}, user_guid = {$user_guid}";
+			SET access_collection_id = $collection_id, user_guid = $user_guid
+			ON DUPLICATE KEY UPDATE user_guid = user_guid";
 	$result = insert_data($q);
 
 	return $result !== false;
@@ -838,7 +840,7 @@ function elgg_list_entities_from_access_id(array $options = array()) {
  *
  * @param int $entity_access_id The entity's access id
  *
- * @return string 'Public', 'Private', etc. or false if error.
+ * @return string 'Public', 'Private', etc.
  * @since 1.7.0
  * @todo I think this probably wants get_access_array() instead of get_write_access_array(),
  * but those two functions return different types of arrays.
@@ -849,15 +851,12 @@ function get_readable_access_level($entity_access_id) {
 	//get the access level for object in readable string
 	$options = get_write_access_array();
 
-	//@todo Really?  Use array_key_exists()
-	foreach ($options as $key => $option) {
-		if ($key == $access) {
-			$entity_acl = htmlentities($option, ENT_QUOTES, 'UTF-8');
-			return $entity_acl;
-			break;
-		}
+	if (array_key_exists($access, $options)) {
+		return $options[$access];
 	}
-	return false;
+
+	// return 'Limited' if the user does not have access to the access collection
+	return elgg_echo('access:limited:label');
 }
 
 /**
@@ -987,9 +986,9 @@ function elgg_override_permissions($hook, $type, $value, $params) {
 	}
 
 	// don't do this so ignore access still works with no one logged in
-//	if (!$user instanceof ElggUser) {
-//		return false;
-//	}
+	//if (!$user instanceof ElggUser) {
+	//	return false;
+	//}
 
 	// check for admin
 	if ($user_guid && elgg_is_admin_user($user_guid)) {

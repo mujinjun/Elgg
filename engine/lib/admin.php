@@ -79,6 +79,10 @@ function elgg_add_admin_notice($id, $message) {
 		if (elgg_admin_notice_exists($id)) {
 			return false;
 		}
+
+		// need to handle when no one is logged in
+		$old_ia = elgg_set_ignore_access(true);
+
 		$admin_notice = new ElggObject();
 		$admin_notice->subtype = 'admin_notice';
 		// admins can see ACCESS_PRIVATE but no one else can.
@@ -86,12 +90,15 @@ function elgg_add_admin_notice($id, $message) {
 		$admin_notice->admin_notice_id = $id;
 		$admin_notice->description = $message;
 
-		return $admin_notice->save();
+		$result = $admin_notice->save();
+
+		elgg_set_ignore_access($old_ia);
+
+		return (bool)$result;
 	}
 
-	return FALSE;
+	return false;
 }
-
 
 /**
  * Remove an admin notice by ID.
@@ -172,10 +179,10 @@ function elgg_admin_notice_exists($id) {
  *
  * This function handles registering the parent if it has not been registered.
  *
- * @param string $section    The menu section to add to
- * @param string $menu_id    The unique ID of section
- * @param string $parent_id  If a child section, the parent section id
- * @param int    $priority   The menu item priority
+ * @param string $section   The menu section to add to
+ * @param string $menu_id   The unique ID of section
+ * @param string $parent_id If a child section, the parent section id
+ * @param int    $priority  The menu item priority
  *
  * @return bool
  * @since 1.8.0
@@ -225,6 +232,7 @@ function admin_init() {
 
 	elgg_register_action('admin/site/update_basic', '', 'admin');
 	elgg_register_action('admin/site/update_advanced', '', 'admin');
+	elgg_register_action('admin/site/flush_cache', '', 'admin');
 
 	elgg_register_action('admin/menu/save', '', 'admin');
 
@@ -254,6 +262,7 @@ function admin_init() {
 	// statistics
 	elgg_register_admin_menu_item('administer', 'statistics', null, 20);
 	elgg_register_admin_menu_item('administer', 'overview', 'statistics');
+	elgg_register_admin_menu_item('administer', 'server', 'statistics');
 
 	// users
 	elgg_register_admin_menu_item('administer', 'users', null, 20);
@@ -301,13 +310,13 @@ function admin_init() {
 	}
 			
 	// widgets
-	$widgets = array('online_users', 'new_users', 'content_stats', 'admin_welcome');
+	$widgets = array('online_users', 'new_users', 'content_stats', 'admin_welcome', 'control_panel');
 	foreach ($widgets as $widget) {
 		elgg_register_widget_type(
 				$widget,
 				elgg_echo("admin:widget:$widget"),
 				elgg_echo("admin:widget:$widget:help"),
-				'admin'
+				array('admin')
 		);
 	}
 
@@ -616,7 +625,7 @@ function elgg_add_admin_widgets($event, $type, $user) {
 
 	// In the form column => array of handlers in order, top to bottom
 	$adminWidgets = array(
-		1 => array('admin_welcome'),
+		1 => array('control_panel', 'admin_welcome'),
 		2 => array('online_users', 'new_users', 'content_stats'),
 	);
 	
